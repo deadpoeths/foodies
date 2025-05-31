@@ -12,8 +12,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
    // Uncomment to reset DB during development
-  final dbPath = await getDatabasesPath();
-  await deleteDatabase(join(dbPath, 'app_users.db'));
+  /*final dbPath = await getDatabasesPath();
+  await deleteDatabase(join(dbPath, 'app_users.db'));*/
 
   runApp(ChefApp());
 }

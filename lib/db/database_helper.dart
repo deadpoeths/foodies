@@ -189,9 +189,15 @@ class DatabaseHelper {
     return result.isNotEmpty ? Order.fromMap(result.first) : null;
   }
 
-  Future<List<Order>> getOrdersByCustomerId(int customerId) async {
+  Future<List<Order>> getOrdersByChefId(int chefId) async {
     final db = await database;
-    final result = await db.query('orders', where: 'customerId = ?', whereArgs: [customerId]);
+    final result = await db.rawQuery('''
+    SELECT o.*
+    FROM orders o
+    JOIN dishes d ON o.dishId = d.id
+    WHERE d.chefId = ?
+  ''', [chefId]);
+
     return result.map((map) => Order.fromMap(map)).toList();
   }
 

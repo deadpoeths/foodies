@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../customer/track.dart';
 import 'chef_profile.dart';
 import 'chef_dishlist.dart';
 import '../../db/database_helper.dart';
@@ -83,22 +84,52 @@ class _ChefDashboardState extends State<ChefDashboard> {
 
   Future<void> _loadOrders() async {
     final db = DatabaseHelper.instance;
-    final orders = await db.getOrderByChefId(widget.userId);
-    setState(() => _orders = orders as List<Order>);
+    final orders = await db.getOrdersByChefId(widget.userId);
+    setState(() => _orders = orders);
+  }
+
+  void _acceptOrder(Order order) {
+    // You can update order status in the DB here
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Order Accepted')),
+    );
+
+    // Navigate to the customer track page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TrackPage()),
+    );
+  }
+
+  void _declineOrder(Order order) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Order Declined')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8F1),
-      appBar: AppBar(
-        title: const Text('Welcome, Chef!', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.deepOrange,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.amber,
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(36)),
+          ),
+          padding: const EdgeInsets.only(top: 24),
+          child: const Center(
+            child: Text(
+              'Welcome, Chef!',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
       ),
       body: _orders.isEmpty
           ? const Center(
-          child: Text('No orders yet',
-              style: TextStyle(fontSize: 18, color: Colors.grey)))
+          child: Text('No orders yet', style: TextStyle(fontSize: 18, color: Colors.grey)))
           : ListView.builder(
         itemCount: _orders.length,
         itemBuilder: (context, index) {
@@ -108,10 +139,41 @@ class _ChefDashboardState extends State<ChefDashboard> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: ListTile(
-              title: Text('Order #${order.id}'),
-              subtitle: Text('Dish ID: ${order.dishId}\nQuantity: ${order.quantity}'),
-              trailing: Text('Customer ID: ${order.customerId}'),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Order #${order.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text('Dish ID: ${order.dishId}'),
+                  Text('Quantity: ${order.quantity}'),
+                  Text('Customer ID: ${order.customerId}'),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () => _acceptOrder(order),
+                        child: const Text('Accept'),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () => _declineOrder(order),
+                        child: const Text('Decline'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           );
         },
