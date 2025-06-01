@@ -25,7 +25,13 @@ class _TrackOrderPageState extends State<TrackOrderPage> {
   Future<void> _loadAndTrackOrders() async {
     final db = DatabaseHelper.instance;
     final allOrders = await db.getAllOrders();
-    final filtered = allOrders.where((o) => o.customerId == widget.customerId).toList();
+    // Filter for in-progress orders only
+    final filtered = allOrders
+        .where((o) =>
+    o.customerId == widget.customerId &&
+        o.status != 'delivered' &&
+        o.status != 'declined')
+        .toList();
 
     if (mounted) {
       setState(() => _orders = filtered);
@@ -43,9 +49,15 @@ class _TrackOrderPageState extends State<TrackOrderPage> {
     Future.doWhile(() async {
       if (!mounted) return false;
       final updatedOrders = await db.getAllOrders();
-      final newFiltered = updatedOrders.where((o) => o.customerId == widget.customerId).toList();
+      // Filter for in-progress orders only
+      final newFiltered = updatedOrders
+          .where((o) =>
+      o.customerId == widget.customerId &&
+          o.status != 'delivered' &&
+          o.status != 'declined')
+          .toList();
 
-      for (Order order in newFiltered) {
+      for (Order order in updatedOrders) {
         if (order.status == 'accepted' && !_trackingOrders.contains(order.id)) {
           print('Starting tracking for order ${order.id}');
           _trackingOrders.add(order.id!);
@@ -57,13 +69,7 @@ class _TrackOrderPageState extends State<TrackOrderPage> {
             setState(() {
               final index = _orders.indexWhere((o) => o.id == order.id);
               if (index != -1) {
-                _orders[index] = Order(
-                  id: order.id,
-                  customerId: order.customerId,
-                  dishId: order.dishId,
-                  quantity: order.quantity,
-                  status: 'declined',
-                );
+                _orders.removeAt(index); // Remove declined order from tracking
               }
             });
           }
@@ -92,13 +98,17 @@ class _TrackOrderPageState extends State<TrackOrderPage> {
             setState(() {
               final index = _orders.indexWhere((o) => o.id == order.id);
               if (index != -1) {
-                _orders[index] = Order(
-                  id: order.id,
-                  customerId: order.customerId,
-                  dishId: order.dishId,
-                  quantity: order.quantity,
-                  status: newStatus,
-                );
+                if (newStatus == 'delivered') {
+                  _orders.removeAt(index); // Remove delivered order from tracking
+                } else {
+                  _orders[index] = Order(
+                    id: order.id,
+                    customerId: order.customerId,
+                    dishId: order.dishId,
+                    quantity: order.quantity,
+                    status: newStatus,
+                  );
+                }
               }
             });
           }
@@ -166,8 +176,11 @@ class _TrackOrderPageState extends State<TrackOrderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Track Orders'),
+      ),
       body: _orders.isEmpty
-          ? Center(child: Text('No orders found.'))
+          ? Center(child: Text('No active orders found.'))
           : ListView.builder(
         itemCount: _orders.length,
         itemBuilder: (context, index) {

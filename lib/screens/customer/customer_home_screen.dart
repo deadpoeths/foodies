@@ -46,7 +46,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     _screens = [
       HomeContent(userId: widget.userId, selectedCategory: _selectedCategory),
       CartPage(customerId: widget.userId),
-      CustomerOrderListPage(),
+      CustomerOrderListPage(customerId: widget.userId), // Pass customerId here
       TrackOrderPage(customerId: widget.userId),
     ];
   }
@@ -180,11 +180,14 @@ class _CategoryIcon extends StatelessWidget {
             child: Icon(icon, color: selected ? Colors.deepOrange : Colors.orange),
           ),
           const SizedBox(height: 4),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 12,
-                  color: selected ? Colors.white : Colors.white70,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: selected ? Colors.white : Colors.white70,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );
@@ -337,7 +340,10 @@ class _HomeContentState extends State<HomeContent> {
                         backgroundColor: Colors.deepOrange,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text("Add to Cart", style: TextStyle(color: Colors.white),),
+                      child: const Text(
+                        "Add to Cart",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
