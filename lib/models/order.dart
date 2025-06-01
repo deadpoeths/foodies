@@ -3,7 +3,7 @@ class Order {
   final int customerId;
   final int dishId;
   final int quantity;
-  final String status;
+  late final String status;
 
   Order({
     this.id,

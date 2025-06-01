@@ -88,23 +88,20 @@ class _ChefDashboardState extends State<ChefDashboard> {
     setState(() => _orders = orders);
   }
 
-  void _acceptOrder(Order order) {
-    // You can update order status in the DB here
+  Future<void> _acceptOrder(Order order) async {
+    await DatabaseHelper.instance.updateOrderStatus(order.id!, 'accepted');
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Order Accepted')),
     );
-
-    // Navigate to the customer track page
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const TrackPage()),
-    );
+    await _loadOrders();
   }
 
-  void _declineOrder(Order order) {
+  Future<void> _declineOrder(Order order) async {
+    await DatabaseHelper.instance.updateOrderStatus(order.id!, 'declined');
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Order Declined')),
     );
+    await _loadOrders();
   }
 
   @override

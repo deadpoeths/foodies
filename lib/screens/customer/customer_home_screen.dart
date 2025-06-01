@@ -47,7 +47,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       HomeContent(userId: widget.userId, selectedCategory: _selectedCategory),
       CartPage(customerId: widget.userId),
       CustomerOrderListPage(),
-      TrackPage(),
+      TrackOrderPage(customerId: widget.userId),
     ];
   }
 
