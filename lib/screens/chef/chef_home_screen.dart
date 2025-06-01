@@ -104,6 +104,17 @@ class _ChefDashboardState extends State<ChefDashboard> {
     await _loadOrders();
   }
 
+  // Helper function to format status text
+  String _formatStatus(String status) {
+    // Split the status by underscore, capitalize each word, and join with a space
+    return status
+        .trim()
+        .toLowerCase()
+        .split('_')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,6 +142,33 @@ class _ChefDashboardState extends State<ChefDashboard> {
         itemCount: _orders.length,
         itemBuilder: (context, index) {
           final order = _orders[index];
+          final isPending = order.status.trim().toLowerCase() == 'pending';
+
+          // Define color based on status
+          Color statusColor;
+          switch (order.status.trim().toLowerCase()) {
+            case 'pending':
+              statusColor = Colors.orange;
+              break;
+            case 'accepted':
+              statusColor = Colors.green;
+              break;
+            case 'declined':
+              statusColor = Colors.red;
+              break;
+            case 'picked_up':
+              statusColor = Colors.blue;
+              break;
+            case 'on_the_way':
+              statusColor = Colors.purple;
+              break;
+            case 'delivered':
+              statusColor = Colors.teal;
+              break;
+            default:
+              statusColor = Colors.grey;
+          }
+
           return Card(
             margin: const EdgeInsets.all(12),
             shape: RoundedRectangleBorder(
@@ -141,34 +179,44 @@ class _ChefDashboardState extends State<ChefDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Order #${order.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Order #${order.id}',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text('Dish ID: ${order.dishId}'),
                   Text('Quantity: ${order.quantity}'),
                   Text('Customer ID: ${order.customerId}'),
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
+                  Text(
+                    'Status: ${_formatStatus(order.status)}',
+                    style: TextStyle(
+                      color: statusColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (isPending)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => _acceptOrder(order),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Accept'),
                         ),
-                        onPressed: () => _acceptOrder(order),
-                        child: const Text('Accept'),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () => _declineOrder(order),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Decline'),
                         ),
-                        onPressed: () => _declineOrder(order),
-                        child: const Text('Decline'),
-                      ),
-                    ],
-                  )
+                      ],
+                    ),
                 ],
               ),
             ),
