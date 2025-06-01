@@ -26,7 +26,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4, // bumped version
+      version: 5, // Bumped to 5
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -34,43 +34,44 @@ class DatabaseHelper {
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT UNIQUE,
-        phone TEXT,
-        password TEXT,
-        role TEXT,
-        profileImage TEXT
-      )
-    ''');
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      email TEXT UNIQUE,
+      phone TEXT,
+      password TEXT,
+      role TEXT,
+      profileImage TEXT,
+      address TEXT  -- Added address
+    )
+  ''');
 
     await db.execute('''
-      CREATE TABLE dishes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chefId INTEGER,
-        name TEXT,
-        description TEXT,
-        price REAL,
-        imagePath TEXT,
-        dietaryInfo TEXT,
-        allergyWarnings TEXT,
-        category TEXT, -- Added category
-        FOREIGN KEY (chefId) REFERENCES users(id)
-      )
-    ''');
+    CREATE TABLE dishes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      chefId INTEGER,
+      name TEXT,
+      description TEXT,
+      price REAL,
+      imagePath TEXT,
+      dietaryInfo TEXT,
+      allergyWarnings TEXT,
+      category TEXT,
+      FOREIGN KEY (chefId) REFERENCES users(id)
+    )
+  ''');
 
     await db.execute('''
-      CREATE TABLE orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        customerId INTEGER,
-        dishId INTEGER,
-        quantity INTEGER,
-        status TEXT,
-        FOREIGN KEY (customerId) REFERENCES users(id),
-        FOREIGN KEY (dishId) REFERENCES dishes(id)
-      )
-    ''');
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      customerId INTEGER,
+      dishId INTEGER,
+      quantity INTEGER,
+      status TEXT,
+      FOREIGN KEY (customerId) REFERENCES users(id),
+      FOREIGN KEY (dishId) REFERENCES dishes(id)
+    )
+  ''');
   }
 
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
@@ -79,6 +80,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 4) {
       await db.execute('ALTER TABLE dishes ADD COLUMN category TEXT');
+    }
+    if (oldVersion < 5) {
+      await db.execute('ALTER TABLE users ADD COLUMN address TEXT');
     }
   }
 
@@ -192,9 +196,10 @@ class DatabaseHelper {
   Future<List<Order>> getOrdersByChefId(int chefId) async {
     final db = await database;
     final result = await db.rawQuery('''
-    SELECT o.*
+    SELECT o.*, d.name AS dishName, u.name AS customerName, u.address AS customerAddress
     FROM orders o
     JOIN dishes d ON o.dishId = d.id
+    JOIN users u ON o.customerId = u.id
     WHERE d.chefId = ?
   ''', [chefId]);
 

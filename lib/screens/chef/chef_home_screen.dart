@@ -130,21 +130,30 @@ class _ChefDashboardState extends State<ChefDashboard> {
           child: const Center(
             child: Text(
               'Welcome, Chef!',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
         ),
       ),
       body: _orders.isEmpty
           ? const Center(
-          child: Text('No orders yet', style: TextStyle(fontSize: 18, color: Colors.grey)))
+        child: Text(
+          'No orders yet',
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+      )
           : ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         itemCount: _orders.length,
         itemBuilder: (context, index) {
           final order = _orders[index];
           final isPending = order.status.trim().toLowerCase() == 'pending';
 
-          // Define color based on status
           Color statusColor;
           switch (order.status.trim().toLowerCase()) {
             case 'pending':
@@ -170,7 +179,8 @@ class _ChefDashboardState extends State<ChefDashboard> {
           }
 
           return Card(
-            margin: const EdgeInsets.all(12),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(vertical: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -179,41 +189,75 @@ class _ChefDashboardState extends State<ChefDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Order #${order.id}',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('Dish ID: ${order.dishId}'),
-                  Text('Quantity: ${order.quantity}'),
-                  Text('Customer ID: ${order.customerId}'),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Status: ${_formatStatus(order.status)}',
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.receipt_long, color: Colors.deepOrange),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Order #${order.id}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          border: Border.all(color: statusColor),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _formatStatus(order.status),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
+                  _orderDetailRow(Icons.fastfood, 'Dish:',
+                      order.dishName ?? 'Unknown Dish'),
+                  _orderDetailRow(Icons.format_list_numbered, 'Quantity:',
+                      '${order.quantity}'),
+                  _orderDetailRow(Icons.person, 'Customer:',
+                      order.customerName ?? 'Unknown'),
+                  _orderDetailRow(Icons.location_on, 'Address:',
+                      order.customerAddress ?? 'No address provided'),
+                  const SizedBox(height: 16),
                   if (isPending)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () => _acceptOrder(order),
+                          icon: const Icon(Icons.check),
+                          label: const Text('Accept'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
-                          child: const Text('Accept'),
                         ),
                         const SizedBox(width: 10),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () => _declineOrder(order),
+                          icon: const Icon(Icons.close),
+                          label: const Text('Decline'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
-                          child: const Text('Decline'),
                         ),
                       ],
                     ),
@@ -222,6 +266,33 @@ class _ChefDashboardState extends State<ChefDashboard> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _orderDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: Colors.grey[600]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.black, fontSize: 14),
+                children: [
+                  TextSpan(
+                    text: '$label ',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

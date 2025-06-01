@@ -4,6 +4,9 @@ class Order {
   final int dishId;
   final int quantity;
   late final String status;
+  final String? dishName;        // New field for dish name
+  final String? customerName;    // New field for customer name
+  final String? customerAddress; // New field for customer address
 
   Order({
     this.id,
@@ -11,6 +14,9 @@ class Order {
     required this.dishId,
     required this.quantity,
     required this.status,
+    this.dishName,
+    this.customerName,
+    this.customerAddress,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,11 +31,14 @@ class Order {
 
   static Order fromMap(Map<String, dynamic> map) {
     return Order(
-      id: map['id'],
-      customerId: map['customerId'],
-      dishId: map['dishId'],
-      quantity: map['quantity'],
-      status: map['status'],
+      id: map['id'] as int?,
+      customerId: map['customerId'] as int,
+      dishId: map['dishId'] as int,
+      quantity: map['quantity'] as int,
+      status: map['status'] as String,
+      dishName: map['dishName'] as String?,
+      customerName: map['customerName'] as String?,
+      customerAddress: map['customerAddress'] as String?,
     );
   }
 }

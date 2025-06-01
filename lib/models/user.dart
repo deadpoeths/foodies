@@ -6,6 +6,7 @@ class User {
   final String password;
   final String role;
   final String? profileImage;
+  final String? address; // Added address field
 
   User({
     this.id,
@@ -15,6 +16,7 @@ class User {
     required this.password,
     required this.role,
     this.profileImage,
+    this.address, // Added to constructor
   });
 
   Map<String, dynamic> toMap() {
@@ -26,22 +28,24 @@ class User {
       'password': password,
       'role': role,
       'profileImage': profileImage,
+      'address': address, // Added to map for database
     };
   }
 
   static User fromMap(Map<String, dynamic> map) {
     return User(
-      id: map['id'],
-      name: map['name'],
-      email: map['email'],
-      phone: map['phone'],
-      password: map['password'],
-      role: map['role'],
-      profileImage: map['profileImage'],
+      id: map['id'] as int?,
+      name: map['name'] as String,
+      email: map['email'] as String,
+      phone: map['phone'] as String,
+      password: map['password'] as String,
+      role: map['role'] as String,
+      profileImage: map['profileImage'] as String?,
+      address: map['address'] as String?, // Added to parse from database
     );
   }
 
-  // ✅ Factory constructor to instantiate a Customer from User
+  // Factory constructor to instantiate a Customer from User
   factory User.asCustomer({
     int? id,
     required String name,
@@ -49,6 +53,7 @@ class User {
     required String phone,
     required String password,
     String? profileImage,
+    String? address, // Added address parameter
   }) {
     return User(
       id: id,
@@ -58,10 +63,11 @@ class User {
       password: password,
       role: 'customer',
       profileImage: profileImage,
+      address: address,
     );
   }
 
-  // ✅ Factory constructor to instantiate a Chef from User
+  // Factory constructor to instantiate a Chef from User
   factory User.asChef({
     int? id,
     required String name,
@@ -69,6 +75,7 @@ class User {
     required String phone,
     required String password,
     String? profileImage,
+    String? address, // Added address parameter
   }) {
     return User(
       id: id,
@@ -78,10 +85,11 @@ class User {
       password: password,
       role: 'chef',
       profileImage: profileImage,
+      address: address,
     );
   }
 
-  // ✅ Type check helper
+  // Type check helper
   bool get isCustomer => role == 'customer';
   bool get isChef => role == 'chef';
 }

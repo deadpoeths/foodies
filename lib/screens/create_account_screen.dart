@@ -14,6 +14,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController addressController = TextEditingController(); // Added for address
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -36,6 +37,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       phone: phoneController.text.trim(),
       password: hashedPassword,
       role: selectedRole,
+      address: addressController.text.trim(), // Added address to User
     );
 
     try {
@@ -103,6 +105,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     _buildLabeledTextField("Email Address", emailController),
                     SizedBox(height: 16),
                     _buildLabeledTextField("Phone Number", phoneController),
+                    SizedBox(height: 16),
+                    _buildLabeledTextField("Address", addressController), // Added address field
                     SizedBox(height: 16),
                     _buildLabeledTextField("Password", passwordController, obscure: obscurePassword, toggleObscure: () {
                       setState(() => obscurePassword = !obscurePassword);
